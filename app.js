@@ -351,7 +351,7 @@
     }
 
     // ========== INSTALL PROMPT ==========
-    let deferredPrompt = null;
+    let deferredPrompt = window.__deferredPrompt;
     let installShown = false;
 
     function isStandalone() {
@@ -361,21 +361,30 @@
                (window.navigator && window.navigator.standalone === true);
     }
 
+    function isIOS() {
+        return /iPhone|iPad|iPod/.test(navigator.userAgent) ||
+               (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    }
+
     function updateInstallCard() {
         const btn = document.getElementById('install-btn');
         const text = document.getElementById('install-text');
         if (deferredPrompt) {
             text.textContent = 'Tryk på "Installer app" for at føje Wordslinger til din hjemmeskærm.';
             btn.classList.remove('hidden');
-        } else {
+        } else if (isIOS()) {
             text.textContent = 'Tryk på Del-knappen (firkant med pil op) i din browser og vælg "Føj til hjemmeskærmen".';
             btn.classList.add('hidden');
+        } else {
+            text.textContent = 'Tryk på "Installer app" nedenfor, eller brug install-ikonet i din browsers adresselinje.';
+            btn.classList.remove('hidden');
         }
     }
 
     window.addEventListener('beforeinstallprompt', (e) => {
         e.preventDefault();
         deferredPrompt = e;
+        window.__deferredPrompt = e;
         if (installShown) updateInstallCard();
     });
 
@@ -387,7 +396,10 @@
     }
 
     document.getElementById('install-btn').addEventListener('click', async () => {
-        if (!deferredPrompt) return;
+        if (!deferredPrompt) {
+            showToast('Brug install-ikonet i din browsers adresselinje for at føje appen til din enhed.');
+            return;
+        }
         deferredPrompt.prompt();
         const { outcome } = await deferredPrompt.userChoice;
         if (outcome === 'accepted') {

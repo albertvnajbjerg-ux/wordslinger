@@ -9,6 +9,13 @@
     <title>Wordslinger</title>
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="style.css">
+    <script>
+        window.__deferredPrompt = null;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            window.__deferredPrompt = e;
+        });
+    </script>
 </head>
 <body>
     <div id="app">
