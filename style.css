@@ -383,6 +383,9 @@ html, body {
    In portrait the game screen is rotated 90deg so the fields
    run along the long side - the layout itself shows that the
    phone should be laid horizontally. No message needed.
+   Uses 100vh/100vw (full screen) so the rotated screen always
+   covers the whole display - 100dvh is shorter when the browser
+   toolbar is visible, leaving a white strip at the bottom.
    ============================================================ */
 @media (orientation: portrait) {
     #game-screen[data-count="3"],
@@ -396,20 +399,6 @@ html, body {
         height: 100vw;
         transform-origin: 0 0;
         transform: rotate(90deg) translateY(-100%);
-    }
-}
-
-/* Dynamic viewport units (dvh/dvw) follow the visible screen on mobile,
-   so the rotated layout never overflows behind toolbars/notches. */
-@supports (width: 1dvh) and (height: 1dvw) {
-    @media (orientation: portrait) {
-        #game-screen[data-count="3"],
-        #game-screen[data-count="4"],
-        #game-screen[data-count="5"],
-        #game-screen[data-count="6"] {
-            width: 100dvh;
-            height: 100dvw;
-        }
     }
 }
 
