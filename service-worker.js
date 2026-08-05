@@ -1,4 +1,4 @@
-const CACHE_NAME = 'wordslinger-v5';
+const CACHE_NAME = 'wordslinger-v6';
 const ASSETS = [
     './',
     './index.html',
@@ -30,41 +30,21 @@ self.addEventListener('activate', e => {
     );
 });
 
-// Fetch: cache first, then refresh the cache in the background
-// (stale-while-revalidate) so the app works offline but still gets
-// updated files the next time it is opened online.
+// Fetch: try the network first so updates always show right away.
+// When offline, fall back to the cached copy so the app still works.
 self.addEventListener('fetch', e => {
     const req = e.request;
     if (req.method !== 'GET') return;
 
-    // For page navigations: always try the network first so updates
-    // show right away, and fall back to the cache when offline.
-    if (req.mode === 'navigate') {
-        e.respondWith(
-            fetch(req).then(res => {
-                if (res && res.ok) {
-                    const clone = res.clone();
-                    caches.open(CACHE_NAME).then(cache => cache.put(req, clone));
-                }
-                return res;
-            }).catch(() =>
-                caches.match(req).then(c => c || caches.match('./index.html'))
-            )
-        );
-        return;
-    }
-
     e.respondWith(
-        caches.match(req).then(cached => {
-            const fetchPromise = fetch(req).then(res => {
-                if (res && res.ok && req.url.startsWith(self.location.origin)) {
-                    const clone = res.clone();
-                    caches.open(CACHE_NAME).then(cache => cache.put(req, clone));
-                }
-                return res;
-            }).catch(() => cached);
-
-            return cached || fetchPromise;
-        })
+        fetch(req).then(res => {
+            if (res && res.ok && req.url.startsWith(self.location.origin)) {
+                const clone = res.clone();
+                caches.open(CACHE_NAME).then(cache => cache.put(req, clone));
+            }
+            return res;
+        }).catch(() =>
+            caches.match(req).then(c => c || caches.match('./index.html'))
+        )
     );
 });
