@@ -60,9 +60,8 @@
     // Layout: players sit around the phone/table.
     // Two sides face each other: top side (flipped, read from across) and
     // bottom side (normal). e.g. 6 players = 3 on top + 3 on bottom.
-    // The top side is built in REVERSE index order so the blue passes
-    // clockwise around the table: bottom-left -> bottom-right -> top-right
-    // -> top-left (not jumping back to the top-left corner).
+    // For 3+ players the zones are ordered so the blue passes CLOCKWISE
+    // around the table: top-left -> top-right -> bottom-right -> bottom-left.
     function buildZones() {
         zonesContainer.innerHTML = '';
         zones = [];
@@ -75,26 +74,38 @@
         const bottomCount = Math.ceil(playerCount / 2);
         const topCount = playerCount - bottomCount;
 
-        // Top side (players sitting across the table) - all flipped,
-        // ordered so higher indices sit to the LEFT (end of the circle).
-        if (topCount > 0) {
+        // 2 players (portrait): Player 1 bottom (normal), Player 2 top (flipped).
+        if (playerCount === 2) {
             const topSide = document.createElement('div');
             topSide.className = 'side';
-            for (let j = 0; j < topCount; j++) {
-                if (j > 0) topSide.appendChild(verticalDivider());
-                topSide.appendChild(makeZone(playerCount - 1 - j, true));
-            }
+            topSide.appendChild(makeZone(1, true));
             zonesContainer.appendChild(topSide);
+            zonesContainer.appendChild(horizontalDivider());
+            const bottomSide = document.createElement('div');
+            bottomSide.className = 'side';
+            bottomSide.appendChild(makeZone(0, false));
+            zonesContainer.appendChild(bottomSide);
+            return;
         }
+
+        // 3+ players (landscape), clockwise order:
+        // Top side (far side, flipped): P1..PtopCount, left -> right.
+        // Bottom side (near side): Pn..P(bottomCount), left -> right.
+        const topSide = document.createElement('div');
+        topSide.className = 'side';
+        for (let j = 0; j < topCount; j++) {
+            if (j > 0) topSide.appendChild(verticalDivider());
+            topSide.appendChild(makeZone(j, true));
+        }
+        zonesContainer.appendChild(topSide);
 
         zonesContainer.appendChild(horizontalDivider());
 
-        // Bottom side (players nearest you) - normal
         const bottomSide = document.createElement('div');
         bottomSide.className = 'side';
         for (let j = 0; j < bottomCount; j++) {
             if (j > 0) bottomSide.appendChild(verticalDivider());
-            bottomSide.appendChild(makeZone(j, false));
+            bottomSide.appendChild(makeZone(playerCount - 1 - j, false));
         }
         zonesContainer.appendChild(bottomSide);
     }
