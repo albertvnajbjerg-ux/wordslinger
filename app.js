@@ -70,10 +70,6 @@
         hintEls = [];
         upEls = [];
         gameScreen.dataset.count = playerCount;
-        // Buttons face player 1's position: portrait = P1 at the bottom,
-        // landscape = P1 at the top-left.
-        document.querySelector('.center-buttons').dataset.dir =
-            playerCount === 2 ? 'portrait' : 'landscape';
 
         const bottomCount = Math.ceil(playerCount / 2);
         const topCount = playerCount - bottomCount;

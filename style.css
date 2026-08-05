@@ -186,17 +186,6 @@ html, body {
     transition: transform 0.25s ease;
 }
 
-/* Only the play triangle points toward player 1: down in portrait
-   (P1 at the bottom), up-left in landscape (P1 at the top-left).
-   The settings gear, pause bars and reset arrow stay upright. */
-.center-buttons[data-dir="portrait"] #icon-play {
-    transform: rotate(90deg);
-}
-
-.center-buttons[data-dir="landscape"] #icon-play {
-    transform: rotate(-135deg);
-}
-
 .circle-btn:active {
     transform: scale(0.9);
     background: #424242;
