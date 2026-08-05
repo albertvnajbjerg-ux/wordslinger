@@ -348,31 +348,6 @@ html, body {
 }
 
 /* ============================================================
-   LANDSCAPE - more room for 3+ players
-   ============================================================ */
-@media (orientation: landscape) {
-    #game-screen[data-count="3"] .time-display { font-size: 72px; }
-    #game-screen[data-count="3"] .player-name { font-size: 28px; }
-    #game-screen[data-count="3"] .tap-hint { font-size: 20px; }
-    #game-screen[data-count="3"] .times-up { font-size: 44px; }
-
-    #game-screen[data-count="4"] .time-display { font-size: 72px; }
-    #game-screen[data-count="4"] .player-name { font-size: 28px; }
-    #game-screen[data-count="4"] .tap-hint { font-size: 20px; }
-    #game-screen[data-count="4"] .times-up { font-size: 44px; }
-
-    #game-screen[data-count="5"] .time-display { font-size: 56px; }
-    #game-screen[data-count="5"] .player-name { font-size: 22px; }
-    #game-screen[data-count="5"] .tap-hint { font-size: 16px; }
-    #game-screen[data-count="5"] .times-up { font-size: 34px; }
-
-    #game-screen[data-count="6"] .time-display { font-size: 56px; }
-    #game-screen[data-count="6"] .player-name { font-size: 22px; }
-    #game-screen[data-count="6"] .tap-hint { font-size: 16px; }
-    #game-screen[data-count="6"] .times-up { font-size: 34px; }
-}
-
-/* ============================================================
    TOAST
    ============================================================ */
 #toast {
