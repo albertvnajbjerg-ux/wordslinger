@@ -1,10 +1,12 @@
-const CACHE_NAME = 'wordslinger-v4';
+const CACHE_NAME = 'wordslinger-v5';
 const ASSETS = [
     './',
     './index.html',
     './style.css',
     './app.js',
-    './manifest.json'
+    './manifest.json',
+    './icon-192.png',
+    './icon-512.png'
 ];
 
 // Install: cache all core files. Each file is cached individually so that

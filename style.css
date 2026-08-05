@@ -19,11 +19,7 @@ html, body {
 
 #app {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100vh;
-    height: 100dvh;
+    inset: 0;
     overflow: hidden;
 }
 
@@ -162,13 +158,13 @@ html, body {
     transform: translate(-50%, -50%);
     display: flex;
     align-items: center;
-    gap: 18px;
+    gap: clamp(10px, 4vw, 20px);
     z-index: 10;
 }
 
 .circle-btn {
-    width: 62px;
-    height: 62px;
+    width: clamp(52px, 16vw, 72px);
+    height: clamp(52px, 16vw, 72px);
     border-radius: 50%;
     border: none;
     background: #616161;
@@ -180,14 +176,19 @@ html, body {
     transition: transform 0.08s ease, background-color 0.2s ease;
 }
 
+.circle-btn svg {
+    width: 46%;
+    height: 46%;
+}
+
 .circle-btn:active {
     transform: scale(0.9);
     background: #424242;
 }
 
 .play-btn {
-    width: 78px;
-    height: 78px;
+    width: clamp(64px, 20vw, 90px);
+    height: clamp(64px, 20vw, 90px);
     background: #616161;
 }
 
@@ -259,8 +260,8 @@ html, body {
 }
 
 .count-btn {
-    width: 52px;
-    height: 52px;
+    width: clamp(44px, 14vw, 56px);
+    height: clamp(44px, 14vw, 56px);
     border-radius: 10px;
     border: 2px solid #ccc;
     background: #fff;
@@ -370,7 +371,6 @@ html, body {
     .time-btn { width: 32px; height: 32px; font-size: 18px; }
     .time-box { gap: 4px; }
     .settings-body { padding: 18px 14px 30px; }
-    .count-btn { width: 46px; height: 46px; font-size: 18px; }
 }
 
 /* ============================================================
@@ -433,6 +433,74 @@ html, body {
 }
 
 /* ============================================================
+   INSTALL PROMPT
+   ============================================================ */
+#install-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+}
+
+.install-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 30px 24px 24px;
+    max-width: 340px;
+    width: 100%;
+    text-align: center;
+    position: relative;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+    animation: fade-in 0.2s ease;
+}
+
+.install-card h2 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #111;
+    margin-bottom: 12px;
+}
+
+.install-card p {
+    font-size: 15px;
+    color: #555;
+    margin-bottom: 22px;
+    line-height: 1.5;
+}
+
+.install-close {
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    font-size: 28px;
+    line-height: 1;
+    color: #999;
+    cursor: pointer;
+    background: none;
+    border: none;
+}
+
+.install-btn {
+    background: #2196F3;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 600;
+    padding: 12px 28px;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.install-btn:active {
+    background: #1976D2;
+}
+
+/* ============================================================
    FONT SCALING FOR MORE PLAYERS
    ============================================================ */
 #game-screen[data-count="3"] .time-display { font-size: 40px; }
@@ -463,8 +531,6 @@ html, body {
     .player-name { font-size: 24px; }
     .tap-hint { font-size: 18px; }
     .times-up { font-size: 34px; }
-    .circle-btn { width: 54px; height: 54px; }
-    .play-btn { width: 68px; height: 68px; }
 }
 
 @media (min-height: 900px) {
