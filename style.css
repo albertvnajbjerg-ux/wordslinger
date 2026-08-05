@@ -20,6 +20,7 @@ html, body {
 #app {
     position: fixed;
     inset: 0;
+    overflow: hidden;
 }
 
 /* ============================================================
@@ -31,6 +32,7 @@ html, body {
     display: flex;
     flex-direction: column;
     background: #fff;
+    overflow: hidden;
 }
 
 #zones-container {
@@ -38,6 +40,7 @@ html, body {
     display: flex;
     flex-direction: column;
     min-height: 0;
+    overflow: hidden;
 }
 
 .side {
@@ -47,6 +50,7 @@ html, body {
     justify-content: center;
     align-items: stretch;
     min-height: 0;
+    overflow: hidden;
 }
 
 .player-zone {
@@ -95,7 +99,7 @@ html, body {
 }
 
 .time-display {
-    font-size: 78px;
+    font-size: clamp(48px, 20vw, 96px);
     font-weight: 800;
     line-height: 1;
     letter-spacing: 2px;
@@ -103,6 +107,8 @@ html, body {
     color: #111;
     transition: color 0.25s ease;
     white-space: nowrap;
+    max-width: 100%;
+    overflow: hidden;
 }
 
 .player-zone.active .time-display {
@@ -291,11 +297,13 @@ html, body {
     display: flex;
     justify-content: space-around;
     align-items: flex-start;
+    gap: 8px;
 }
 
 .time-col {
     text-align: center;
     flex: 1;
+    min-width: 0;
 }
 
 .time-col label {
@@ -304,6 +312,7 @@ html, body {
     font-weight: 500;
     color: #666;
     margin-bottom: 10px;
+    white-space: nowrap;
 }
 
 .time-box {
@@ -347,6 +356,15 @@ html, body {
     color: #fff;
 }
 
+/* Narrow phones: shrink settings time controls so nothing overflows */
+@media (max-width: 380px) {
+    .time-value { min-width: 64px; padding: 8px 10px; font-size: 17px; }
+    .time-btn { width: 32px; height: 32px; font-size: 18px; }
+    .time-box { gap: 4px; }
+    .settings-body { padding: 18px 14px 30px; }
+    .count-btn { width: 46px; height: 46px; font-size: 18px; }
+}
+
 /* ============================================================
    3+ PLAYERS: fields laid out lengthwise (landscape)
    In portrait the game screen is rotated 90deg so the fields
@@ -365,6 +383,20 @@ html, body {
         height: 100vw;
         transform-origin: 0 0;
         transform: rotate(90deg) translateY(-100%);
+    }
+}
+
+/* Dynamic viewport units (dvh/dvw) follow the visible screen on mobile,
+   so the rotated layout never overflows behind toolbars/notches. */
+@supports (width: 1dvh) and (height: 1dvw) {
+    @media (orientation: portrait) {
+        #game-screen[data-count="3"],
+        #game-screen[data-count="4"],
+        #game-screen[data-count="5"],
+        #game-screen[data-count="6"] {
+            width: 100dvh;
+            height: 100dvw;
+        }
     }
 }
 
@@ -419,7 +451,7 @@ html, body {
    RESPONSIVE
    ============================================================ */
 @media (max-height: 640px) {
-    .time-display { font-size: 60px; }
+    .time-display { font-size: clamp(40px, 18vw, 60px); }
     .player-name { font-size: 24px; }
     .tap-hint { font-size: 18px; }
     .times-up { font-size: 34px; }
@@ -428,7 +460,7 @@ html, body {
 }
 
 @media (min-height: 900px) {
-    .time-display { font-size: 92px; }
+    .time-display { font-size: clamp(56px, 24vw, 92px); }
     .player-name { font-size: 34px; }
     .tap-hint { font-size: 24px; }
     .times-up { font-size: 52px; }
