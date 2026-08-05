@@ -1,0 +1,329 @@
+(() => {
+    'use strict';
+
+    // ========== STATE ==========
+    let players = [];           // { name, time, extraTime, remaining, timesUp }
+    let playerCount = 2;
+    let settings = [];
+    for (let i = 0; i < 6; i++) {
+        settings.push({ name: 'Player ' + (i + 1), time: 15, extraTime: 2 });
+    }
+
+    let activePlayer = -1;      // player index with the blue / counting down
+    let timer = null;
+    let isRunning = false;
+    let resetCount = 0;
+    let resetTimeout = null;
+    let toastTimer = null;
+
+    // ========== DOM ==========
+    const gameScreen = document.getElementById('game-screen');
+    const zonesContainer = document.getElementById('zones-container');
+    const settingsScreen = document.getElementById('settings-screen');
+    const settingsBody = document.getElementById('player-settings');
+    const countBtns = document.querySelectorAll('#settings-screen .count-btn');
+
+    let zones = [];
+    let timeEls = [];
+    let nameEls = [];
+    let hintEls = [];
+    let upEls = [];
+
+    // ========== HELPERS ==========
+    function formatTime(sec) {
+        const m = Math.floor(sec / 60);
+        const s = sec % 60;
+        return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+    }
+
+    function showToast(msg) {
+        const t = document.getElementById('toast');
+        t.textContent = msg;
+        t.classList.remove('hidden');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => t.classList.add('hidden'), 2200);
+    }
+
+    // ========== BUILD ZONES ==========
+    // Layout: players sit around the phone/table.
+    // Two sides face each other: top side (flipped, read from across) and
+    // bottom side (normal). e.g. 6 players = 3 on top + 3 on bottom.
+    function buildZones() {
+        zonesContainer.innerHTML = '';
+        zones = [];
+        timeEls = [];
+        nameEls = [];
+        hintEls = [];
+        upEls = [];
+        gameScreen.dataset.count = playerCount;
+
+        const bottomCount = Math.ceil(playerCount / 2);
+        const topCount = playerCount - bottomCount;
+
+        // Top side (players sitting across the table) - all flipped
+        if (topCount > 0) {
+            const topSide = document.createElement('div');
+            topSide.className = 'side';
+            for (let j = 0; j < topCount; j++) {
+                if (j > 0) topSide.appendChild(verticalDivider());
+                topSide.appendChild(makeZone(bottomCount + j, true));
+            }
+            zonesContainer.appendChild(topSide);
+        }
+
+        zonesContainer.appendChild(horizontalDivider());
+
+        // Bottom side (players nearest you) - normal
+        const bottomSide = document.createElement('div');
+        bottomSide.className = 'side';
+        for (let j = 0; j < bottomCount; j++) {
+            if (j > 0) bottomSide.appendChild(verticalDivider());
+            bottomSide.appendChild(makeZone(j, false));
+        }
+        zonesContainer.appendChild(bottomSide);
+    }
+
+    function verticalDivider() {
+        const d = document.createElement('div');
+        d.className = 'zone-divider zone-divider-vert';
+        return d;
+    }
+
+    function horizontalDivider() {
+        const d = document.createElement('div');
+        d.className = 'zone-divider';
+        return d;
+    }
+
+    function makeZone(playerIdx, flipped) {
+        const zone = document.createElement('div');
+        zone.className = 'player-zone';
+        zone.innerHTML = `
+            <div class="player-content${flipped ? ' flipped' : ''}">
+                <div class="time-display"></div>
+                <div class="player-name"></div>
+                <div class="tap-hint">Tap to start</div>
+                <div class="times-up hidden">Time's up!</div>
+            </div>`;
+        zone.addEventListener('click', () => tapZone(playerIdx));
+
+        zones[playerIdx] = zone;
+        timeEls[playerIdx] = zone.querySelector('.time-display');
+        nameEls[playerIdx] = zone.querySelector('.player-name');
+        hintEls[playerIdx] = zone.querySelector('.tap-hint');
+        upEls[playerIdx] = zone.querySelector('.times-up');
+        return zone;
+    }
+
+    // ========== GAME FLOW ==========
+    function initGame() {
+        players = [];
+        for (let i = 0; i < playerCount; i++) {
+            players.push({
+                name: settings[i].name || 'Player ' + (i + 1),
+                time: settings[i].time,
+                extraTime: settings[i].extraTime,
+                remaining: settings[i].time,
+                timesUp: false
+            });
+        }
+        activePlayer = -1;
+        isRunning = false;
+        stopTimer();
+        buildZones();
+        renderAll();
+        setPlayIcon();
+    }
+
+    function renderAll() {
+        for (let i = 0; i < playerCount; i++) {
+            const p = players[i];
+            timeEls[i].textContent = formatTime(p.remaining);
+            nameEls[i].textContent = p.name;
+            zones[i].classList.toggle('active', i === activePlayer && !p.timesUp);
+            hintEls[i].classList.toggle('hidden', activePlayer !== -1);
+            upEls[i].classList.toggle('hidden', !p.timesUp);
+        }
+    }
+
+    function startTimer() {
+        stopTimer();
+        isRunning = true;
+        timer = setInterval(() => {
+            if (activePlayer === -1 || !players[activePlayer]) return;
+            const p = players[activePlayer];
+
+            p.remaining--;
+            if (p.remaining <= 0) {
+                p.remaining = 0;
+                p.timesUp = true;
+                stopTimer();
+                isRunning = false;
+                renderAll();
+                setPlayIcon();
+                return;
+            }
+            timeEls[activePlayer].textContent = formatTime(p.remaining);
+        }, 1000);
+    }
+
+    function stopTimer() {
+        if (timer) {
+            clearInterval(timer);
+            timer = null;
+        }
+        isRunning = false;
+    }
+
+    function setPlayIcon() {
+        const play = document.getElementById('icon-play');
+        const pause = document.getElementById('icon-pause');
+        play.classList.toggle('hidden', isRunning);
+        pause.classList.toggle('hidden', !isRunning);
+    }
+
+    // ========== TAP HANDLING ==========
+    function tapZone(z) {
+        // Game over from a times up - need reset first
+        for (let i = 0; i < players.length; i++) {
+            if (players[i].timesUp) return;
+        }
+
+        if (activePlayer === -1) {
+            // Start: the NEXT player's field becomes blue and counts down
+            activePlayer = (z + 1) % playerCount;
+            players[activePlayer].remaining = players[activePlayer].time;
+            renderAll();
+            startTimer();
+        } else if (activePlayer === z) {
+            // The blue player answers correctly: get bonus, pass the blue on
+            players[z].remaining += players[z].extraTime;
+            activePlayer = (activePlayer + 1) % playerCount;
+            renderAll();
+            startTimer();
+        }
+        setPlayIcon();
+    }
+
+    // ========== CENTER BUTTONS ==========
+    document.getElementById('btn-play').addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (activeZone === -1) return;
+        for (let i = 0; i < players.length; i++) {
+            if (players[i].timesUp) return;
+        }
+        if (isRunning) {
+            stopTimer();
+        } else {
+            startTimer();
+        }
+        setPlayIcon();
+    });
+
+    document.getElementById('btn-reset').addEventListener('click', (e) => {
+        e.stopPropagation();
+        resetCount++;
+        if (resetCount === 1) {
+            showToast('Tryk en gang mere for at genstarte');
+            resetTimeout = setTimeout(() => { resetCount = 0; }, 2200);
+        } else {
+            clearTimeout(resetTimeout);
+            resetCount = 0;
+            initGame();
+            showToast('Genstartet');
+        }
+    });
+
+    document.getElementById('btn-settings').addEventListener('click', (e) => {
+        e.stopPropagation();
+        stopTimer();
+        renderSettings();
+        settingsScreen.classList.remove('hidden');
+    });
+
+    // ========== SETTINGS ==========
+    countBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            playerCount = parseInt(btn.dataset.count, 10);
+            countBtns.forEach(b => b.classList.toggle('active', b === btn));
+            renderPlayerSettings();
+        });
+    });
+
+    document.getElementById('settings-close').addEventListener('click', () => {
+        settingsScreen.classList.add('hidden');
+        renderAll();
+        setPlayIcon();
+    });
+
+    document.getElementById('settings-save').addEventListener('click', () => {
+        readSettingsFromDom();
+        settingsScreen.classList.add('hidden');
+        initGame();
+    });
+
+    function renderSettings() {
+        countBtns.forEach(b => b.classList.toggle('active', parseInt(b.dataset.count, 10) === playerCount));
+        renderPlayerSettings();
+    }
+
+    function renderPlayerSettings() {
+        let html = '';
+        for (let i = 0; i < playerCount; i++) {
+            const s = settings[i];
+            html += `
+                <div class="player-entry" data-idx="${i}">
+                    <input type="text" value="${s.name}" data-idx="${i}" class="p-name" placeholder="Player ${i + 1}">
+                    <div class="time-row">
+                        <div class="time-col">
+                            <label>Time</label>
+                            <div class="time-box">
+                                <button class="time-btn" data-idx="${i}" data-type="time" data-dir="-1">&minus;</button>
+                                <div class="time-value" data-idx="${i}" data-type="time">${formatTime(s.time)}</div>
+                                <button class="time-btn" data-idx="${i}" data-type="time" data-dir="1">+</button>
+                            </div>
+                        </div>
+                        <div class="time-col">
+                            <label>Extra Time</label>
+                            <div class="time-box">
+                                <button class="time-btn" data-idx="${i}" data-type="extra" data-dir="-1">&minus;</button>
+                                <div class="time-value" data-idx="${i}" data-type="extra">${formatTime(s.extraTime)}</div>
+                                <button class="time-btn" data-idx="${i}" data-type="extra" data-dir="1">+</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+        }
+        settingsBody.innerHTML = html;
+        bindPlayerSettings();
+    }
+
+    function bindPlayerSettings() {
+        settingsBody.querySelectorAll('.p-name').forEach(input => {
+            input.addEventListener('input', () => {
+                settings[parseInt(input.dataset.idx, 10)].name = input.value;
+            });
+        });
+        settingsBody.querySelectorAll('.time-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const idx = parseInt(btn.dataset.idx, 10);
+                const type = btn.dataset.type;
+                const dir = parseInt(btn.dataset.dir, 10);
+                const key = type === 'time' ? 'time' : 'extraTime';
+                const step = type === 'time' ? 5 : 1;
+                settings[idx][key] = Math.max(key === 'time' ? 5 : 0, settings[idx][key] + dir * step);
+                const el = settingsBody.querySelector(`.time-value[data-idx="${idx}"][data-type="${type}"]`);
+                el.textContent = formatTime(settings[idx][key]);
+            });
+        });
+    }
+
+    function readSettingsFromDom() {
+        settingsBody.querySelectorAll('.p-name').forEach(input => {
+            settings[parseInt(input.dataset.idx, 10)].name = input.value;
+        });
+    }
+
+    // ========== START ==========
+    initGame();
+})();

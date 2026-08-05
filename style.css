@@ -1,0 +1,414 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+html, body {
+    height: 100%;
+    overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+.hidden {
+    display: none !important;
+}
+
+#app {
+    position: fixed;
+    inset: 0;
+}
+
+/* ============================================================
+   GAME SCREEN
+   ============================================================ */
+#game-screen {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+}
+
+#zones-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.side {
+    flex: 1;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: stretch;
+    min-height: 0;
+}
+
+.player-zone {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.25s ease;
+    position: relative;
+    overflow: hidden;
+    min-height: 0;
+}
+
+.zone-divider {
+    flex: 0 0 2px;
+    background: #9e9e9e;
+}
+
+.zone-divider-vert {
+    flex: 0 0 2px;
+    width: 2px;
+    align-self: stretch;
+    background: #9e9e9e;
+}
+
+/* Active (blue) state */
+.player-zone.active {
+    background: #4FC3F7;
+}
+
+.player-content {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 0 4px;
+    max-width: 100%;
+    overflow: hidden;
+}
+
+.flipped {
+    transform: rotate(180deg);
+}
+
+.time-display {
+    font-size: 78px;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: 2px;
+    font-variant-numeric: tabular-nums;
+    color: #111;
+    transition: color 0.25s ease;
+    white-space: nowrap;
+}
+
+.player-zone.active .time-display {
+    color: #fff;
+}
+
+.player-name {
+    font-size: 30px;
+    font-weight: 600;
+    color: #333;
+    transition: color 0.25s ease;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+.player-zone.active .player-name {
+    color: #fff;
+}
+
+.tap-hint {
+    font-size: 20px;
+    font-weight: 500;
+    color: #999;
+    margin-top: 4px;
+}
+
+.player-zone.active .tap-hint {
+    color: #e0f2fe;
+}
+
+.times-up {
+    font-size: 44px;
+    font-weight: 800;
+    color: #D32F2F;
+    margin-top: 4px;
+}
+
+/* ============================================================
+   CENTER BUTTONS
+   ============================================================ */
+.center-buttons {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    z-index: 10;
+}
+
+.circle-btn {
+    width: 62px;
+    height: 62px;
+    border-radius: 50%;
+    border: none;
+    background: #616161;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+    transition: transform 0.08s ease, background-color 0.2s ease;
+}
+
+.circle-btn:active {
+    transform: scale(0.9);
+    background: #424242;
+}
+
+.play-btn {
+    width: 78px;
+    height: 78px;
+    background: #616161;
+}
+
+/* ============================================================
+   SETTINGS SCREEN
+   ============================================================ */
+#settings-screen {
+    position: absolute;
+    inset: 0;
+    background: #fff;
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    animation: slide-up 0.2s ease;
+}
+
+@keyframes slide-up {
+    from { transform: translateY(40px); opacity: 0; }
+    to   { transform: translateY(0);     opacity: 1; }
+}
+
+.settings-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 16px;
+    border-bottom: 1px solid #e5e5e5;
+    flex-shrink: 0;
+}
+
+.settings-header h1 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #111;
+}
+
+.settings-side-btn {
+    background: none;
+    border: none;
+    font-size: 30px;
+    line-height: 1;
+    color: #333;
+    cursor: pointer;
+    padding: 4px 12px;
+}
+
+.settings-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 22px 20px 40px;
+    -webkit-overflow-scrolling: touch;
+}
+
+.settings-body h2 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #111;
+    margin-bottom: 14px;
+}
+
+.player-count-btns {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 34px;
+}
+
+.count-btn {
+    width: 52px;
+    height: 52px;
+    border-radius: 10px;
+    border: 2px solid #ccc;
+    background: #fff;
+    font-size: 20px;
+    font-weight: 700;
+    color: #333;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.count-btn.active {
+    background: #2196F3;
+    border-color: #2196F3;
+    color: #fff;
+}
+
+.player-entry {
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.player-entry input[type="text"] {
+    width: 100%;
+    border: none;
+    border-bottom: 2px solid #444;
+    font-size: 20px;
+    font-weight: 600;
+    color: #111;
+    padding: 6px 0;
+    outline: none;
+    margin-bottom: 18px;
+    background: transparent;
+    border-radius: 0;
+}
+
+.player-entry input[type="text"]:focus {
+    border-bottom-color: #2196F3;
+}
+
+.time-row {
+    display: flex;
+    justify-content: space-around;
+    align-items: flex-start;
+}
+
+.time-col {
+    text-align: center;
+    flex: 1;
+}
+
+.time-col label {
+    display: block;
+    font-size: 15px;
+    font-weight: 500;
+    color: #666;
+    margin-bottom: 10px;
+}
+
+.time-box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.time-value {
+    background: #8B0000;
+    color: #fff;
+    font-size: 20px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    padding: 10px 16px;
+    border-radius: 8px;
+    min-width: 84px;
+    text-align: center;
+}
+
+.time-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: 2px solid #8B0000;
+    background: #fff;
+    color: #8B0000;
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.12s ease;
+}
+
+.time-btn:active {
+    background: #8B0000;
+    color: #fff;
+}
+
+/* ============================================================
+   TOAST
+   ============================================================ */
+#toast {
+    position: fixed;
+    bottom: 46px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(33, 33, 33, 0.92);
+    color: #fff;
+    padding: 12px 22px;
+    border-radius: 10px;
+    font-size: 15px;
+    z-index: 100;
+    max-width: 90%;
+    text-align: center;
+    animation: fade-in 0.2s ease;
+}
+
+@keyframes fade-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+/* ============================================================
+   FONT SCALING FOR MORE PLAYERS
+   ============================================================ */
+#game-screen[data-count="3"] .time-display { font-size: 40px; }
+#game-screen[data-count="3"] .player-name { font-size: 16px; }
+#game-screen[data-count="3"] .tap-hint { font-size: 13px; }
+#game-screen[data-count="3"] .times-up { font-size: 24px; }
+
+#game-screen[data-count="4"] .time-display { font-size: 40px; }
+#game-screen[data-count="4"] .player-name { font-size: 16px; }
+#game-screen[data-count="4"] .tap-hint { font-size: 13px; }
+#game-screen[data-count="4"] .times-up { font-size: 24px; }
+
+#game-screen[data-count="5"] .time-display { font-size: 30px; }
+#game-screen[data-count="5"] .player-name { font-size: 13px; }
+#game-screen[data-count="5"] .tap-hint { font-size: 11px; }
+#game-screen[data-count="5"] .times-up { font-size: 20px; }
+
+#game-screen[data-count="6"] .time-display { font-size: 30px; }
+#game-screen[data-count="6"] .player-name { font-size: 13px; }
+#game-screen[data-count="6"] .tap-hint { font-size: 11px; }
+#game-screen[data-count="6"] .times-up { font-size: 20px; }
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-height: 640px) {
+    .time-display { font-size: 60px; }
+    .player-name { font-size: 24px; }
+    .tap-hint { font-size: 18px; }
+    .times-up { font-size: 34px; }
+    .circle-btn { width: 54px; height: 54px; }
+    .play-btn { width: 68px; height: 68px; }
+}
+
+@media (min-height: 900px) {
+    .time-display { font-size: 92px; }
+    .player-name { font-size: 34px; }
+    .tap-hint { font-size: 24px; }
+    .times-up { font-size: 52px; }
+}
