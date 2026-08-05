@@ -70,6 +70,10 @@
         hintEls = [];
         upEls = [];
         gameScreen.dataset.count = playerCount;
+        // Buttons face player 1's position: portrait = P1 at the bottom,
+        // landscape = P1 at the top-left.
+        document.querySelector('.center-buttons').dataset.dir =
+            playerCount === 2 ? 'portrait' : 'landscape';
 
         const bottomCount = Math.ceil(playerCount / 2);
         const topCount = playerCount - bottomCount;
@@ -221,10 +225,14 @@
     }
 
     function setPlayIcon() {
+        const started = activePlayer !== -1;
         const play = document.getElementById('icon-play');
         const pause = document.getElementById('icon-pause');
-        play.classList.toggle('hidden', isRunning);
-        pause.classList.toggle('hidden', !isRunning);
+        // Show the pause icon when the game is running OR before it has
+        // started, so the button never looks like a "start" button.
+        const showPlay = started && !isRunning;
+        play.classList.toggle('hidden', !showPlay);
+        pause.classList.toggle('hidden', showPlay);
     }
 
     // ========== TAP HANDLING ==========

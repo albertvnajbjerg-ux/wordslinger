@@ -182,6 +182,18 @@ html, body {
 .circle-btn svg {
     width: 46%;
     height: 46%;
+    transform-origin: center;
+    transition: transform 0.25s ease;
+}
+
+/* Icons point toward player 1: bottom in portrait (P1 at the bottom),
+   top-left in landscape (P1 at the top-left). */
+.center-buttons[data-dir="portrait"] svg {
+    transform: rotate(90deg);
+}
+
+.center-buttons[data-dir="landscape"] svg {
+    transform: rotate(-135deg);
 }
 
 .circle-btn:active {
