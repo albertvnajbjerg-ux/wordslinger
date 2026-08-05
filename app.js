@@ -10,6 +10,7 @@
     }
 
     let activePlayer = -1;      // player index with the blue / counting down
+    let gameOver = false;
     let timer = null;
     let isRunning = false;
     let resetCount = 0;
@@ -34,6 +35,18 @@
         const m = Math.floor(sec / 60);
         const s = sec % 60;
         return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+    }
+
+    function aliveCount() {
+        return players.filter(p => !p.timesUp).length;
+    }
+
+    function nextAlive(fromIdx) {
+        for (let step = 1; step <= players.length; step++) {
+            const i = (fromIdx + step) % players.length;
+            if (!players[i].timesUp) return i;
+        }
+        return -1;
     }
 
     function showToast(msg) {
@@ -128,6 +141,7 @@
             });
         }
         activePlayer = -1;
+        gameOver = false;
         isRunning = false;
         stopTimer();
         buildZones();
@@ -140,9 +154,20 @@
             const p = players[i];
             timeEls[i].textContent = formatTime(p.remaining);
             nameEls[i].textContent = p.name;
-            zones[i].classList.toggle('active', i === activePlayer && !p.timesUp);
-            hintEls[i].classList.toggle('hidden', activePlayer !== -1);
+            zones[i].classList.toggle('active', i === activePlayer && !p.timesUp && !gameOver);
+            // Only show "Time's up!" on the out player's field
+            timeEls[i].classList.toggle('hidden', p.timesUp);
             upEls[i].classList.toggle('hidden', !p.timesUp);
+
+            if (p.timesUp) {
+                hintEls[i].classList.add('hidden');
+            } else if (gameOver) {
+                hintEls[i].classList.remove('hidden');
+                hintEls[i].textContent = 'Vinder!';
+            } else {
+                hintEls[i].classList.toggle('hidden', activePlayer !== -1);
+                hintEls[i].textContent = 'Tap to start';
+            }
         }
     }
 
@@ -158,9 +183,22 @@
                 p.remaining = 0;
                 p.timesUp = true;
                 stopTimer();
-                isRunning = false;
-                renderAll();
-                setPlayIcon();
+
+                if (aliveCount() > 1) {
+                    // The blue automatically jumps to the next player
+                    activePlayer = nextAlive(activePlayer);
+                    renderAll();
+                    startTimer();
+                    setPlayIcon();
+                } else {
+                    // Only one player left - game over
+                    activePlayer = -1;
+                    gameOver = true;
+                    renderAll();
+                    const winner = players.find(pl => !pl.timesUp);
+                    if (winner) showToast(winner.name + ' vinder!');
+                    setPlayIcon();
+                }
                 return;
             }
             timeEls[activePlayer].textContent = formatTime(p.remaining);
@@ -184,21 +222,21 @@
 
     // ========== TAP HANDLING ==========
     function tapZone(z) {
-        // Game over from a times up - need reset first
-        for (let i = 0; i < players.length; i++) {
-            if (players[i].timesUp) return;
-        }
+        if (gameOver) return;
+        if (players[z].timesUp) return;
 
         if (activePlayer === -1) {
-            // Start: the NEXT player's field becomes blue and counts down
-            activePlayer = (z + 1) % playerCount;
+            // Start: the NEXT alive player's field becomes blue and counts down
+            activePlayer = nextAlive(z);
+            if (activePlayer === -1) return;
             players[activePlayer].remaining = players[activePlayer].time;
             renderAll();
             startTimer();
         } else if (activePlayer === z) {
             // The blue player answers correctly: get bonus, pass the blue on
             players[z].remaining += players[z].extraTime;
-            activePlayer = (activePlayer + 1) % playerCount;
+            activePlayer = nextAlive(z);
+            if (activePlayer === -1) return;
             renderAll();
             startTimer();
         }
@@ -208,10 +246,8 @@
     // ========== CENTER BUTTONS ==========
     document.getElementById('btn-play').addEventListener('click', (e) => {
         e.stopPropagation();
-        if (activeZone === -1) return;
-        for (let i = 0; i < players.length; i++) {
-            if (players[i].timesUp) return;
-        }
+        if (gameOver) return;
+        if (activePlayer === -1) return;
         if (isRunning) {
             stopTimer();
         } else {
