@@ -348,6 +348,27 @@ html, body {
 }
 
 /* ============================================================
+   3+ PLAYERS: fields laid out lengthwise (landscape)
+   In portrait the game screen is rotated 90deg so the fields
+   run along the long side - the layout itself shows that the
+   phone should be laid horizontally. No message needed.
+   ============================================================ */
+@media (orientation: portrait) {
+    #game-screen[data-count="3"],
+    #game-screen[data-count="4"],
+    #game-screen[data-count="5"],
+    #game-screen[data-count="6"] {
+        inset: auto;
+        top: 0;
+        left: 0;
+        width: 100vh;
+        height: 100vw;
+        transform-origin: 0 0;
+        transform: rotate(90deg) translateY(-100%);
+    }
+}
+
+/* ============================================================
    TOAST
    ============================================================ */
 #toast {
