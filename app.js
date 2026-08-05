@@ -359,19 +359,9 @@
                (window.navigator && window.navigator.standalone === true);
     }
 
-    window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        deferredPrompt = e;
-    });
-
-    function maybeShowInstallPrompt() {
-        if (installShown || isStandalone()) return;
-        installShown = true;
-
-        const overlay = document.getElementById('install-overlay');
+    function updateInstallCard() {
         const btn = document.getElementById('install-btn');
         const text = document.getElementById('install-text');
-
         if (deferredPrompt) {
             text.textContent = 'Tryk på "Installer app" for at føje Wordslinger til din hjemmeskærm.';
             btn.classList.remove('hidden');
@@ -379,7 +369,19 @@
             text.textContent = 'Tryk på Del-knappen (firkant med pil op) i din browser og vælg "Føj til hjemmeskærmen".';
             btn.classList.add('hidden');
         }
-        overlay.classList.remove('hidden');
+    }
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        if (installShown) updateInstallCard();
+    });
+
+    function maybeShowInstallPrompt() {
+        if (installShown || isStandalone()) return;
+        installShown = true;
+        updateInstallCard();
+        document.getElementById('install-overlay').classList.remove('hidden');
     }
 
     document.getElementById('install-btn').addEventListener('click', async () => {
@@ -396,7 +398,7 @@
         document.getElementById('install-overlay').classList.add('hidden');
     });
 
-    setTimeout(maybeShowInstallPrompt, 2000);
+    setTimeout(maybeShowInstallPrompt, 300);
 
     // ========== START ==========
     initGame();
