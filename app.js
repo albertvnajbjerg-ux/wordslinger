@@ -57,6 +57,13 @@
         toastTimer = setTimeout(() => t.classList.add('hidden'), 2200);
     }
 
+    function updateRotatePrompt() {
+        const el = document.getElementById('rotate-prompt');
+        const landscape = window.matchMedia('(orientation: landscape)').matches;
+        const needsRotate = playerCount >= 3 && !landscape;
+        el.classList.toggle('hidden', !needsRotate || el.dataset.dismissed === '1');
+    }
+
     // ========== BUILD ZONES ==========
     // Layout: players sit around the phone/table.
     // Two sides face each other: top side (flipped, read from across) and
@@ -147,6 +154,7 @@
         buildZones();
         renderAll();
         setPlayIcon();
+        updateRotatePrompt();
     }
 
     function renderAll() {
@@ -295,6 +303,10 @@
     document.getElementById('settings-save').addEventListener('click', () => {
         readSettingsFromDom();
         settingsScreen.classList.add('hidden');
+        document.getElementById('rotate-prompt').dataset.dismissed = '0';
+        if (playerCount >= 3 && screen.orientation && screen.orientation.lock) {
+            screen.orientation.lock('landscape').catch(() => {});
+        }
         initGame();
     });
 
@@ -359,6 +371,16 @@
             settings[parseInt(input.dataset.idx, 10)].name = input.value;
         });
     }
+
+    // ========== ROTATE PROMPT ==========
+    const rotatePrompt = document.getElementById('rotate-prompt');
+    rotatePrompt.addEventListener('click', () => {
+        rotatePrompt.dataset.dismissed = '1';
+        rotatePrompt.classList.add('hidden');
+    });
+
+    window.addEventListener('orientationchange', () => updateRotatePrompt());
+    window.addEventListener('resize', () => updateRotatePrompt());
 
     // ========== START ==========
     initGame();
