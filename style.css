@@ -441,7 +441,7 @@ html, body {
 #install-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.55);
+    background: rgba(255, 255, 255, 0.92);
     z-index: 200;
     display: flex;
     align-items: center;
@@ -451,13 +451,14 @@ html, body {
 
 .install-card {
     background: #fff;
+    border: 1px solid #e0e0e0;
     border-radius: 16px;
     padding: 30px 24px 24px;
     max-width: 340px;
     width: 100%;
     text-align: center;
     position: relative;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
     animation: fade-in 0.2s ease;
 }
 
