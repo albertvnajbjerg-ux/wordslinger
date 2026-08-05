@@ -60,6 +60,9 @@
     // Layout: players sit around the phone/table.
     // Two sides face each other: top side (flipped, read from across) and
     // bottom side (normal). e.g. 6 players = 3 on top + 3 on bottom.
+    // The top side is built in REVERSE index order so the blue passes
+    // clockwise around the table: bottom-left -> bottom-right -> top-right
+    // -> top-left (not jumping back to the top-left corner).
     function buildZones() {
         zonesContainer.innerHTML = '';
         zones = [];
@@ -72,13 +75,14 @@
         const bottomCount = Math.ceil(playerCount / 2);
         const topCount = playerCount - bottomCount;
 
-        // Top side (players sitting across the table) - all flipped
+        // Top side (players sitting across the table) - all flipped,
+        // ordered so higher indices sit to the LEFT (end of the circle).
         if (topCount > 0) {
             const topSide = document.createElement('div');
             topSide.className = 'side';
             for (let j = 0; j < topCount; j++) {
                 if (j > 0) topSide.appendChild(verticalDivider());
-                topSide.appendChild(makeZone(bottomCount + j, true));
+                topSide.appendChild(makeZone(playerCount - 1 - j, true));
             }
             zonesContainer.appendChild(topSide);
         }
