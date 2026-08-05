@@ -10,7 +10,6 @@
     }
 
     let activePlayer = -1;      // player index with the blue / counting down
-    let gameOver = false;
     let timer = null;
     let isRunning = false;
     let resetCount = 0;
@@ -55,13 +54,6 @@
         t.classList.remove('hidden');
         clearTimeout(toastTimer);
         toastTimer = setTimeout(() => t.classList.add('hidden'), 2200);
-    }
-
-    function updateRotatePrompt() {
-        const el = document.getElementById('rotate-prompt');
-        const landscape = window.matchMedia('(orientation: landscape)').matches;
-        const needsRotate = playerCount >= 3 && !landscape;
-        el.classList.toggle('hidden', !needsRotate || el.dataset.dismissed === '1');
     }
 
     // ========== BUILD ZONES ==========
@@ -148,13 +140,11 @@
             });
         }
         activePlayer = -1;
-        gameOver = false;
         isRunning = false;
         stopTimer();
         buildZones();
         renderAll();
         setPlayIcon();
-        updateRotatePrompt();
     }
 
     function renderAll() {
@@ -162,16 +152,13 @@
             const p = players[i];
             timeEls[i].textContent = formatTime(p.remaining);
             nameEls[i].textContent = p.name;
-            zones[i].classList.toggle('active', i === activePlayer && !p.timesUp && !gameOver);
+            zones[i].classList.toggle('active', i === activePlayer && !p.timesUp);
             // Only show "Time's up!" on the out player's field
             timeEls[i].classList.toggle('hidden', p.timesUp);
             upEls[i].classList.toggle('hidden', !p.timesUp);
 
             if (p.timesUp) {
                 hintEls[i].classList.add('hidden');
-            } else if (gameOver) {
-                hintEls[i].classList.remove('hidden');
-                hintEls[i].textContent = 'Vinder!';
             } else {
                 hintEls[i].classList.toggle('hidden', activePlayer !== -1);
                 hintEls[i].textContent = 'Tap to start';
@@ -199,12 +186,9 @@
                     startTimer();
                     setPlayIcon();
                 } else {
-                    // Only one player left - game over
-                    activePlayer = -1;
-                    gameOver = true;
+                    // Only one player left - blue moves to them, but no countdown
+                    activePlayer = nextAlive(activePlayer);
                     renderAll();
-                    const winner = players.find(pl => !pl.timesUp);
-                    if (winner) showToast(winner.name + ' vinder!');
                     setPlayIcon();
                 }
                 return;
@@ -230,7 +214,6 @@
 
     // ========== TAP HANDLING ==========
     function tapZone(z) {
-        if (gameOver) return;
         if (players[z].timesUp) return;
 
         if (activePlayer === -1) {
@@ -254,7 +237,6 @@
     // ========== CENTER BUTTONS ==========
     document.getElementById('btn-play').addEventListener('click', (e) => {
         e.stopPropagation();
-        if (gameOver) return;
         if (activePlayer === -1) return;
         if (isRunning) {
             stopTimer();
@@ -303,10 +285,6 @@
     document.getElementById('settings-save').addEventListener('click', () => {
         readSettingsFromDom();
         settingsScreen.classList.add('hidden');
-        document.getElementById('rotate-prompt').dataset.dismissed = '0';
-        if (playerCount >= 3 && screen.orientation && screen.orientation.lock) {
-            screen.orientation.lock('landscape').catch(() => {});
-        }
         initGame();
     });
 
@@ -371,16 +349,6 @@
             settings[parseInt(input.dataset.idx, 10)].name = input.value;
         });
     }
-
-    // ========== ROTATE PROMPT ==========
-    const rotatePrompt = document.getElementById('rotate-prompt');
-    rotatePrompt.addEventListener('click', () => {
-        rotatePrompt.dataset.dismissed = '1';
-        rotatePrompt.classList.add('hidden');
-    });
-
-    window.addEventListener('orientationchange', () => updateRotatePrompt());
-    window.addEventListener('resize', () => updateRotatePrompt());
 
     // ========== START ==========
     initGame();
