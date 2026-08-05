@@ -1,4 +1,4 @@
-const CACHE_NAME = 'wordslinger-v3';
+const CACHE_NAME = 'wordslinger-v4';
 const ASSETS = [
     './',
     './index.html',
@@ -34,6 +34,23 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
     const req = e.request;
     if (req.method !== 'GET') return;
+
+    // For page navigations: always try the network first so updates
+    // show right away, and fall back to the cache when offline.
+    if (req.mode === 'navigate') {
+        e.respondWith(
+            fetch(req).then(res => {
+                if (res && res.ok) {
+                    const clone = res.clone();
+                    caches.open(CACHE_NAME).then(cache => cache.put(req, clone));
+                }
+                return res;
+            }).catch(() =>
+                caches.match(req).then(c => c || caches.match('./index.html'))
+            )
+        );
+        return;
+    }
 
     e.respondWith(
         caches.match(req).then(cached => {
