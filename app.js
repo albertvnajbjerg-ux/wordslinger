@@ -160,7 +160,25 @@
         buildZones();
         renderAll();
         setPlayIcon();
+        fitRotatedScreen();
     }
+
+    // For 3+ players in portrait the game screen is rotated to landscape.
+    // Measure the actual screen size so the rotated screen ALWAYS covers
+    // the full display - no white strip at the bottom.
+    function fitRotatedScreen() {
+        const portrait = window.matchMedia('(orientation: portrait)').matches;
+        if (playerCount >= 3 && portrait) {
+            const app = document.getElementById('app');
+            gameScreen.style.width = app.offsetHeight + 'px';
+            gameScreen.style.height = app.offsetWidth + 'px';
+        } else {
+            gameScreen.style.width = '';
+            gameScreen.style.height = '';
+        }
+    }
+    window.addEventListener('resize', fitRotatedScreen);
+    window.addEventListener('orientationchange', fitRotatedScreen);
 
     function renderAll() {
         for (let i = 0; i < playerCount; i++) {
