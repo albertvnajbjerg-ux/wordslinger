@@ -399,6 +399,18 @@ html, body {
         height: 100vw;
         transform-origin: 0 0;
         transform: rotate(90deg) translateY(-100%);
+        /* After the 90deg rotation the phone's bottom (home indicator)
+           is the screen's right edge, so pad the right side. */
+        padding-right: env(safe-area-inset-bottom);
+    }
+}
+
+@media (orientation: landscape) {
+    #game-screen[data-count="3"],
+    #game-screen[data-count="4"],
+    #game-screen[data-count="5"],
+    #game-screen[data-count="6"] {
+        padding-bottom: env(safe-area-inset-bottom);
     }
 }
 
