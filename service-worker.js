@@ -1,4 +1,4 @@
-const CACHE_NAME = 'wordslinger-v7';
+const CACHE_NAME = 'wordslinger-v8';
 const ASSETS = [
     './',
     './index.html',
